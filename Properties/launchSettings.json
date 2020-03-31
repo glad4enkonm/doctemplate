@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "doctemplate": {
+      "commandName": "Project",
+      "commandLineArgs": "-t _test.docx"
+    }
+  }
+}
