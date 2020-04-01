@@ -9,6 +9,7 @@
     <PackageReference Include="CommandLineParser" Version="2.7.82" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.10.1" />
     <PackageReference Include="Jint" Version="2.11.58" />
+    <PackageReference Include="YamlDotNet" Version="8.1.0" />
   </ItemGroup>
 
 </Project>
