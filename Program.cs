@@ -2,8 +2,8 @@
 using DocumentFormat.OpenXml.Packaging;
 using Jint;
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -32,7 +32,8 @@ namespace doctemplate
 
             IEnumerable<string> constValues = valueSet.Where(m => !m.StartsWith("=")); // all not formulas
 
-            Engine jsEngine = new Engine();
+            var de = CultureInfo.GetCultureInfo("de-DE");
+            Engine jsEngine = new Engine(cfg => cfg.Culture(de));
 
             IEnumerable<string> loadedKeys = LoadValuesFromFileIfExist(ref documentText, templatePath, ref jsEngine);
 
@@ -46,6 +47,7 @@ namespace doctemplate
 
             jsEngine = jsEngine.Execute( // define function EUR
                 @"function $(amount) {
+                    amount =  typeof amount === 'string' ? parseFloat(amount) : amount;
                     return amount.toLocaleString('de - DE', {minimumFractionDigits: 2});
                 }");
 
@@ -110,7 +112,11 @@ namespace doctemplate
         {
             string valuesFilePath = templatePath + ".yaml";
             if (!File.Exists(valuesFilePath))
-                return new string[] { }; // return empty string array if no file
+            {
+                valuesFilePath = "config.yaml";
+                if (!File.Exists(valuesFilePath))
+                    return new string[] { }; // return empty string array if no file
+            }
             
             string yaml = File.ReadAllText(valuesFilePath);
 
@@ -130,7 +136,7 @@ namespace doctemplate
             try
             {
                 string code = func.StartsWith("=") ? func.Substring(1) : func; // remove leading = sign
-                string value = jsEngine.Execute(code).GetCompletionValue().ToObject().ToString();
+                string value = jsEngine.Execute(code).GetCompletionValue().ToString();
                 documentText = documentText.Replace($"!{func}!", value);
             }
             catch (Exception ex)
